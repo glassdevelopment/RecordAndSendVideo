@@ -34,6 +34,8 @@ import java.util.Date;
   private Camera camera = null;
   private MediaRecorder mediaRecorder = null;
 
+  private boolean recording = false;
+
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -83,12 +85,16 @@ import java.util.Date;
     mediaRecorder.setCamera(camera);
     mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
     mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+
+    mediaRecorder.setMaxFileSize(5 * 1024 * 1024);
+
     mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
 
     mediaRecorder.setOutputFile(getOutputMediaFile(this.MEDIA_TYPE_VIDEO).toString() );
 
     try { mediaRecorder.prepare(); } catch (Exception e) {}
     mediaRecorder.start();
+    recording = true;
 
   }
 
@@ -99,6 +105,8 @@ import java.util.Date;
     mediaRecorder.stop();
     mediaRecorder.reset();
     mediaRecorder.release();
+
+    recording = false;
 
     camera.lock();
     camera.release();
@@ -120,7 +128,7 @@ import java.util.Date;
     // To be safe, you should check that the SDCard is mounted
     // using Environment.getExternalStorageState() before doing this.
     if (!Environment.getExternalStorageState().equalsIgnoreCase(Environment.MEDIA_MOUNTED)) {
-      return  null;
+      return null;
     }
 
     File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
